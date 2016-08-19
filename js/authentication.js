@@ -67,6 +67,28 @@ authApp.controller('authCtrl', ['$scope', '$http', '$location', '$state', 'rails
         });
     }
 
+    $scope.resetPassword = function(new_password, confirm_new_password) {
+        var reset_token = $location.search().reset_password_token;
+        $http({
+            method: 'PUT',
+            url: rails_server_path + '/users/password.json',
+            data: {
+                user: {
+                    password: new_password,
+                    confirm_password: confirm_new_password,
+                    reset_password_token: reset_token
+                }
+            }
+        }).then(function successCallback(response) {
+            $location.search('reset_password_token', null);
+            $state.go("login");
+        }, function errorCallback(error) {
+            $scope.reset_status = "alert alert-danger";
+            $scope.reset_message = "Unable to reset password";
+            fadeAlert("#reset_alert");
+        });
+    }
+
     function fadeAlert(id) {
         $(id).fadeTo(3000, 0);
     }
