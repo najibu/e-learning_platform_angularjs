@@ -67,3 +67,50 @@ mainApp.config(['railsServer', '$stateProvider', '$urlRouterProvider', function(
         });
     $urlRouterProvider.otherwise("dashboard");
 }]);
+
+mainApp.controller('mainCtrl', ['$scope', '$rootScope', 'userSrv', 'logoutSrv', 'schoolSrv', '$state', function mainController($scope, $rootScope, userSrv, logoutSrv, schoolSrv, $state) {
+
+		var rails_server_path = railsServer;
+
+    $scope.logout = function() {
+        $http({
+            headers: requestHeaders(),
+            method: 'DELETE',
+            url: rails_server_path + '/users/sign_out.json'
+        }).then(function successCallback(response) {
+            delete localStorage.email;
+            delete localStorage.token;
+            $state.go("login");
+        });
+    }
+
+    // when the controller runs for the first time
+    if (localStorage.token) {
+        getCurrentUser();
+    } else {
+        $scope.current_user = undefined;
+    }
+
+     // everytime there's a state change
+    $rootScope.$on("$stateChangeSuccess", function() {
+        if (localStorage.token) {
+            getCurrentUser();
+        } else {
+            $scope.current_user = undefined;
+        }
+    });
+
+    // user info
+    function getCurrentUser() {
+        userSrv.getCurrentUser().then(
+            function(userPromiseData) {
+                $scope.current_user = userPromiseData;
+                console.log("Current user @mainController: ", $scope.current_user);
+            });
+    }
+
+    // school info
+    schoolSrv.getSchoolData().then(function successCallback(response) {
+        $scope.school = response.data;
+    });
+}]);
