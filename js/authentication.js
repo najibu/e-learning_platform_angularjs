@@ -52,6 +52,21 @@ authApp.controller('authCtrl', ['$scope', '$http', '$location', '$state', 'rails
         });
     }
 
+     $scope.forgotPassword = function(user_email) {
+        $http({
+            method: 'GET',
+            url: rails_server_path + '/send_password.json?user_email=' + user_email
+        }).then(function successCallback(response) {
+            $scope.forgot_status = "alert alert-success";
+            $scope.forgot_message = "Please check your inbox";
+            fadeAlert("#forgot_alert");
+        }, function errorCallback(error) {
+            $scope.forgot_status = "alert alert-danger";
+            $scope.forgot_message = "Unable to send recovery email";
+            fadeAlert("#forgot_alert");
+        });
+    }
+
     function fadeAlert(id) {
         $(id).fadeTo(3000, 0);
     }
